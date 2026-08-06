@@ -1,0 +1,31 @@
+# Use cases will be implemented in Phase 2
+# This file serves as a placeholder for the use case implementations
+
+__all__ = [
+    "CreateConversationUseCase",
+    "GetConversationUseCase",
+    "UpdateConversationUseCase",
+    "ListConversationsUseCase",
+    "DeleteConversationUseCase",
+    "AddMessageUseCase",
+    "GetMessagesUseCase",
+    "CreateKnowledgeBaseUseCase",
+    "GetKnowledgeBaseUseCase",
+    "UpdateKnowledgeBaseUseCase",
+    "ListKnowledgeBasesUseCase",
+    "DeleteKnowledgeBaseUseCase",
+    "UploadDocumentUseCase",
+    "GetDocumentUseCase",
+    "ListDocumentsUseCase",
+    "DeleteDocumentUseCase",
+    "ProcessDocumentUseCase",
+    "ChatUseCase",
+    "ChatStreamUseCase",
+    "SearchUseCase",
+    "SimilaritySearchUseCase",
+    "RegisterUseCase",
+    "LoginUseCase",
+    "GetCurrentUserUseCase",
+    "RefreshTokenUseCase",
+    "HealthCheckUseCase",
+]

@@ -1,0 +1,376 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+
+jobs:
+  backend-unit-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev,test]"
+      
+      - name: Run unit tests
+        run: |
+          pytest tests/ -m "not integration and not slow and not regression" \
+            --cov=app \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=json \
+            --junitxml=test-results.xml
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/test-results.xml
+      
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: |
+            backend/htmlcov/
+            backend/coverage.json
+
+  backend-integration-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    services:
+      ollama:
+        image: ollama/ollama:latest
+        ports:
+          - 11434:11434
+        options: >-
+          --health-cmd "ollama list"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev,test]"
+      
+      - name: Pull Ollama models
+        run: |
+          ollama pull qwen3.5:4b
+          ollama pull nomic-embed-text
+        env:
+          OLLAMA_HOST: http://localhost:11434
+      
+      - name: Run integration tests
+        run: |
+          pytest tests/integration/ -v \
+            --junitxml=integration-results.xml
+        env:
+          OLLAMA_BASE_URL: http://localhost:11434
+          DATABASE_URL: sqlite+aiosqlite:///test.db
+      
+      - name: Upload integration results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-integration-results
+          path: backend/integration-results.xml
+
+  backend-load-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    services:
+      ollama:
+        image: ollama/ollama:latest
+        ports:
+          - 11434:11434
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev,test]"
+      
+      - name: Pull Ollama models
+        run: |
+          ollama pull qwen3.5:4b
+          ollama pull nomic-embed-text
+        env:
+          OLLAMA_HOST: http://localhost:11434
+      
+      - name: Run load tests
+        run: |
+          pytest tests/load/ -v -m "not stress" \
+            --junitxml=load-results.xml
+        env:
+          OLLAMA_BASE_URL: http://localhost:11434
+          DATABASE_URL: sqlite+aiosqlite:///test.db
+      
+      - name: Upload load test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-load-results
+          path: backend/load-results.xml
+
+  backend-regression-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    services:
+      ollama:
+        image: ollama/ollama:latest
+        ports:
+          - 11434:11434
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev,test]"
+      
+      - name: Pull Ollama models
+        run: |
+          ollama pull qwen3.5:4b
+          ollama pull nomic-embed-text
+        env:
+          OLLAMA_HOST: http://localhost:11434
+      
+      - name: Run regression tests
+        run: |
+          pytest tests/regression/ -v \
+            --junitxml=regression-results.xml
+        env:
+          OLLAMA_BASE_URL: http://localhost:11434
+          DATABASE_URL: sqlite+aiosqlite:///test.db
+      
+      - name: Upload regression results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-regression-results
+          path: backend/regression-results.xml
+
+  frontend-unit-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run unit tests
+        run: npm run test -- --coverage
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./frontend/coverage/lcov.info
+          flags: frontend
+
+  frontend-e2e-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    services:
+      backend:
+        image: ghcr.io/${{ github.repository }}/backend:latest
+        ports:
+          - 8000:8000
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///test.db
+          OLLAMA_BASE_URL: http://ollama:11434
+      ollama:
+        image: ollama/ollama:latest
+        ports:
+          - 11434:11434
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+      
+      - name: Build frontend
+        run: npm run build
+      
+      - name: Start preview server
+        run: npm run preview -- --port 5173 &
+        shell: bash
+      
+      - name: Run E2E tests
+        run: npx playwright test tests/e2e/ --reporter=junit,playwright-results.xml
+        env:
+          E2E_BASE_URL: http://localhost:5173
+          E2E_API_URL: http://localhost:8000
+      
+      - name: Upload E2E results
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-e2e-results
+          path: |
+            frontend/playwright-results.xml
+            frontend/test-results/
+
+  frontend-integration-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    services:
+      backend:
+        image: ghcr.io/${{ github.repository }}/backend:latest
+        ports:
+          - 8000:8000
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///test.db
+          OLLAMA_BASE_URL: http://ollama:11434
+      ollama:
+        image: ollama/ollama:latest
+        ports:
+          - 11434:11434
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          E2E_API_URL: http://localhost:8000
+
+  generate-reports:
+    runs-on: ubuntu-latest
+    needs:
+      - backend-unit-tests
+      - backend-integration-tests
+      - backend-load-tests
+      - backend-regression-tests
+      - frontend-unit-tests
+      - frontend-e2e-tests
+      - frontend-integration-tests
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results
+      
+      - name: Generate HTML report
+        run: |
+          python scripts/generate_report.py \
+            --input-dir test-results \
+            --output test-report.html \
+            --format html
+      
+      - name: Generate Markdown report
+        run: |
+          python scripts/generate_report.py \
+            --input-dir test-results \
+            --output test-report.md \
+            --format markdown
+      
+      - name: Generate JSON report
+        run: |
+          python scripts/generate_report.py \
+            --input-dir test-results \
+            --output test-report.json \
+            --format json
+      
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            test-report.html
+            test-report.md
+            test-report.json
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: generate-reports
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Deploy to staging
+        run: echo "Deploy to staging..."
+        # Add your staging deployment logic here
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: generate-reports
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Deploy to production
+        run: echo "Deploy to production..."
+        # Add your production deployment logic here

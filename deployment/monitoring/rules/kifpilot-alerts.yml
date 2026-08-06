@@ -1,0 +1,132 @@
+groups:
+  - name: kifpilot-alerts
+    interval: 30s
+    rules:
+      # High-level service alerts
+      - alert: ServiceDown
+        expr: up{job="kifpilot-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "KifPilot backend service is down"
+          description: "Backend service has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status_code=~"5.."}[5m]) 
+            / 
+            rate(http_requests_total[5m])
+          ) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High 5xx error rate on KifPilot backend"
+          description: "5xx error rate is above 5% for more than 2 minutes"
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="kifpilot-backend"}[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request latency on KifPilot backend"
+          description: "P95 latency is above 5 seconds for more than 5 minutes"
+
+      # Infrastructure alerts
+      - alert: HighCPUUsage
+        expr: system_cpu_usage_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 90% for more than 5 minutes"
+
+      - alert: HighMemoryUsage
+        expr: system_memory_usage_bytes{type="percent"} > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 90% for more than 5 minutes"
+
+      - alert: LowDiskSpace
+        expr: system_disk_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space"
+          description: "Disk usage is above 85% for more than 5 minutes"
+
+      # AI-specific alerts
+      - alert: HighAILatency
+        expr: |
+          histogram_quantile(0.95, rate(ai_generation_time_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High AI generation latency"
+          description: "P95 AI generation time is above 30 seconds"
+
+      - alert: HighHallucinationRate
+        expr: |
+          rate(ai_hallucination_rate{model="qwen3.5:4b"}[5m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High hallucination rate detected"
+          description: "Hallucination rate is above 10% for more than 10 minutes"
+
+      - alert: LowCitationPrecision
+        expr: |
+          ai_citation_precision < 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low citation precision"
+          description: "Citation precision is below 50%"
+
+      - alert: OllamaDown
+        expr: up{job="ollama"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ollama service is down"
+          description: "Ollama LLM service has been down for more than 1 minute"
+
+      - alert: ChromaDBDown
+        expr: up{job="chromadb"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "ChromaDB is down"
+          description: "ChromaDB vector store has been down for more than 1 minute"
+
+      - alert: HighInFlightRequests
+        expr: http_requests_in_flight > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of in-flight requests"
+          description: "More than 100 requests are being processed simultaneously"
+
+      - alert: DatabaseConnectionHigh
+        expr: db_connections_active > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High database connection count"
+          description: "More than 50 active database connections"

@@ -1,0 +1,121 @@
+{
+  "name": "sample_benchmark",
+  "version": "1.0",
+  "description": "Sample benchmark dataset for testing evaluation pipeline",
+  "items": [
+    {
+      "id": "geo_001",
+      "question": "What is the capital of France?",
+      "expected_answer": "Paris is the capital and largest city of France.",
+      "expected_documents": ["france_geography", "france_capital"],
+      "expected_pages": [1],
+      "expected_sections": ["Geography", "Capital Cities"],
+      "category": "geography",
+      "difficulty": "easy",
+      "tags": ["capital", "france", "paris"]
+    },
+    {
+      "id": "geo_002",
+      "question": "What is the largest country by land area?",
+      "expected_answer": "Russia is the largest country by land area, covering approximately 17.1 million square kilometers.",
+      "expected_documents": ["world_geography", "russia_geography"],
+      "expected_pages": [1, 5],
+      "expected_sections": ["Geography", "Countries"],
+      "category": "geography",
+      "difficulty": "easy",
+      "tags": ["largest", "country", "russia", "area"]
+    },
+    {
+      "id": "sci_001",
+      "question": "How does photosynthesis work?",
+      "expected_answer": "Photosynthesis is the process by which plants convert light energy into chemical energy. Plants absorb light using chlorophyll in their leaves and use it to convert carbon dioxide and water into glucose and oxygen.",
+      "expected_documents": ["biology_photosynthesis", "plant_biology"],
+      "expected_pages": [10, 11, 12],
+      "expected_sections": ["Biology", "Photosynthesis", "Plant Science"],
+      "category": "science",
+      "difficulty": "medium",
+      "tags": ["biology", "photosynthesis", "plants", "energy"]
+    },
+    {
+      "id": "sci_002",
+      "question": "What is the theory of relativity?",
+      "expected_answer": "Einstein's theory of relativity consists of special relativity (laws of physics are the same for all non-accelerating observers, speed of light is constant) and general relativity (gravity is curvature of spacetime caused by mass and energy).",
+      "expected_documents": ["physics_relativity", "einstein_biography"],
+      "expected_pages": [1, 2, 3],
+      "expected_sections": ["Physics", "Relativity", "Einstein"],
+      "category": "science",
+      "difficulty": "hard",
+      "tags": ["physics", "relativity", "einstein", "spacetime"]
+    },
+    {
+      "id": "hist_001",
+      "question": "When did World War II end?",
+      "expected_answer": "World War II ended on September 2, 1945, when Japan formally surrendered aboard the USS Missouri in Tokyo Bay.",
+      "expected_documents": ["ww2_history", "world_war_2_end"],
+      "expected_pages": [45, 46],
+      "expected_sections": ["History", "World War II"],
+      "category": "history",
+      "difficulty": "easy",
+      "tags": ["history", "ww2", "world war", "1945"]
+    },
+    {
+      "id": "tech_001",
+      "question": "What is machine learning?",
+      "expected_answer": "Machine learning is a subset of artificial intelligence that enables computers to learn and improve from experience without being explicitly programmed. It uses algorithms to identify patterns in data and make predictions or decisions.",
+      "expected_documents": ["ml_intro", "ai_foundations"],
+      "expected_pages": [1, 2, 3, 4],
+      "expected_sections": ["Computer Science", "AI", "Machine Learning"],
+      "category": "technology",
+      "difficulty": "medium",
+      "tags": ["machine learning", "ai", "algorithms", "data science"]
+    },
+    {
+      "id": "tech_002",
+      "question": "What is the difference between SQL and NoSQL databases?",
+      "expected_answer": "SQL databases are relational, use structured query language, and enforce ACID properties with predefined schemas. NoSQL databases are non-relational, schema-less, and designed for horizontal scaling with flexible data models (document, key-value, column-family, graph).",
+      "expected_documents": ["databases_comparison", "sql_vs_nosql"],
+      "expected_pages": [10, 11, 12],
+      "expected_sections": ["Databases", "SQL", "NoSQL"],
+      "category": "technology",
+      "difficulty": "medium",
+      "tags": ["databases", "sql", "nosql", "data storage"]
+    },
+    {
+      "id": "med_001",
+      "question": "What are the symptoms of diabetes?",
+      "expected_answer": "Common symptoms of diabetes include frequent urination, excessive thirst, unexplained weight loss, fatigue, blurred vision, slow-healing wounds, and frequent infections. Type 1 symptoms appear suddenly, while Type 2 develops gradually.",
+      "expected_documents": ["diabetes_symptoms", "diabetes_types"],
+      "expected_pages": [1, 2, 5],
+      "expected_sections": ["Medicine", "Diabetes", "Endocrinology"],
+      "category": "medical",
+      "difficulty": "medium",
+      "tags": ["diabetes", "symptoms", "health", "medical"]
+    },
+    {
+      "id": "legal_001",
+      "question": "What is intellectual property?",
+      "expected_answer": "Intellectual property (IP) refers to creations of the mind, such as inventions, literary and artistic works, designs, symbols, names, and images used in commerce. IP is protected by law through patents, copyrights, trademarks, and trade secrets.",
+      "expected_documents": ["ip_law", "intellectual_property_rights"],
+      "expected_pages": [1, 2, 3],
+      "expected_sections": ["Law", "Intellectual Property", "Legal"],
+      "category": "legal",
+      "difficulty": "medium",
+      "tags": ["intellectual property", "patents", "copyright", "trademarks", "law"]
+    },
+    {
+      "id": "fin_001",
+      "question": "What is compound interest?",
+      "expected_answer": "Compound interest is interest calculated on the initial principal and also on the accumulated interest from previous periods. It allows money to grow exponentially over time, unlike simple interest which is only calculated on the principal.",
+      "expected_documents": ["finance_basics", "compound_interest"],
+      "expected_pages": [5, 6],
+      "expected_sections": ["Finance", "Investing", "Interest"],
+      "category": "finance",
+      "difficulty": "easy",
+      "tags": ["finance", "interest", "investing", "compound interest"]
+    }
+  ],
+  "metadata": {
+    "created_for": "evaluation testing",
+    "version": "1.0"
+  }
+}
