@@ -21,7 +21,7 @@ A production-ready, multi-tenant AI customer support agent with RAG (Retrieval-A
 - **Conversation Memory**: Persistent conversation history with context awareness
 - **Enterprise Security**: Rate limiting, input validation, audit logging, secure file uploads
 - **Observability**: Prometheus metrics, structured logging, distributed tracing, health checks
-- **Production Ready**: Docker support, Kubernetes manifests, CI/CD pipeline
+- **Production Ready**: Docker + Docker Compose deployment, Prometheus/Grafana monitoring stack, CI/CD pipeline
 
 ## Quick Start
 
